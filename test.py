@@ -23,8 +23,8 @@ parser.add_argument('--dataset', default='sysu',  help='dataset name: regdb or s
 parser.add_argument('--lr', default=0.01, type=float, help='learning rate')
 parser.add_argument('--optim', default='sgd', type=str, help='optimizer')
 parser.add_argument('--arch', default='resnet50', type=str, help='network baseline')
-parser.add_argument('--resume', '-r', default='', type=str, help='resume from checkpoint')
-parser.add_argument('--model_path', default='save_model/', type=str, help='model save path')
+parser.add_argument('--resume', '-r', default='sysu_id_drop_0.0_lr_1.0e-02_dim_512_resnet50_best.t', type=str, help='resume from checkpoint')
+parser.add_argument('--model_path', default='D:/Projects/2019/2019-02-10_GradutePaper/3.Code/Cross-Modal-Re-ID-baseline/', type=str, help='model save path')
 parser.add_argument('--log_path', default='log/', type=str, help='log save path')
 parser.add_argument('--workers', default=4, type=int, metavar='N',
                     help='number of data loading workers (default: 4)')
@@ -44,7 +44,7 @@ parser.add_argument('--drop', default=0.0, type=float,
                     metavar='drop', help='dropout ratio')
 parser.add_argument('--trial', default=1, type=int,
                     metavar='t', help='trial')
-parser.add_argument('--gpu', default='0', type=str,
+parser.add_argument('--gpu', default='1', type=str,
                       help='gpu device ids for CUDA_VISIBLE_DEVICES')
 parser.add_argument('--mode', default='all', type=str, help='all or indoor')
 
@@ -54,7 +54,7 @@ os.environ['CUDA_VISIBLE_DEVICES'] = args.gpu
 np.random.seed(1)
 dataset = args.dataset
 if dataset == 'sysu':
-    data_path = '/home/datasets/prml/computervision/re-id/sysu-mm01/ori_data'
+    data_path = 'E:/DataSets/SYSU-MM01/SYSU-MM01'
     n_class = 395
     test_mode = [1, 2] 
 elif dataset =='regdb':

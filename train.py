@@ -16,6 +16,11 @@ from eval_metrics import eval_sysu, eval_regdb
 from model import embed_net
 from utils import *
 
+# bugfix:https://github.com/martinarjovsky/WassersteinGAN/pull/69
+# must add code as follow on windows machine
+if __name__=="__main__":
+    pass
+
 parser = argparse.ArgumentParser(description='PyTorch Cross-Modality Training')
 parser.add_argument('--dataset', default='sysu',  help='dataset name: regdb or sysu]')
 parser.add_argument('--lr', default=0.01, type=float, help='learning rate')
@@ -25,7 +30,7 @@ parser.add_argument('--arch', default='resnet50', type=str,
 parser.add_argument('--resume', '-r', default='', type=str, 
                     help='resume from checkpoint')
 parser.add_argument('--test-only', action='store_true', help='test only') 
-parser.add_argument('--model_path', default='save_model/', type=str, 
+parser.add_argument('--model_path', default='D:/Projects/2019/2019-02-10_GradutePaper/3.Code/Cross-Modal-Re-ID-baseline/model/', type=str,
                     help='model save path')
 parser.add_argument('--save_epoch', default=20, type=int,
                     metavar='s', help='save model every 10 epochs')
@@ -39,7 +44,7 @@ parser.add_argument('--img_w', default=144, type=int,
                     metavar='imgw', help='img width')
 parser.add_argument('--img_h', default=288, type=int,
                     metavar='imgh', help='img height')
-parser.add_argument('--batch-size', default=32, type=int,
+parser.add_argument('--batch-size', default=4, type=int,
                     metavar='B', help='training batch size')
 parser.add_argument('--test-batch', default=64, type=int,
                     metavar='tb', help='testing batch size')
@@ -49,7 +54,7 @@ parser.add_argument('--drop', default=0.0, type=float,
                     metavar='drop', help='dropout ratio')
 parser.add_argument('--trial', default=1, type=int,
                     metavar='t', help='trial (only for RegDB dataset)')
-parser.add_argument('--gpu', default='0', type=str,
+parser.add_argument('--gpu', default='1', type=str,
                       help='gpu device ids for CUDA_VISIBLE_DEVICES')
 parser.add_argument('--mode', default='all', type=str, help='all or indoor')
 
@@ -59,7 +64,7 @@ np.random.seed(0)
 
 dataset = args.dataset
 if dataset == 'sysu':
-    data_path = 'sysu-mm01/ori_data/'
+    data_path = 'C:/AccData/SYSU-MM01/'
     log_path = args.log_path + 'sysu_log/'
     test_mode = [1, 2] # thermal to visible
 elif dataset =='regdb':
@@ -293,7 +298,7 @@ def test(epoch):
         cmc, mAP = eval_sysu(-distmat, query_label, gall_label, query_cam, gall_cam)
     print('Evaluation Time:\t {:.3f}'.format(time.time()-start))
     return cmc, mAP
-    
+
 # training
 print('==> Start Training...')    
 for epoch in range(start_epoch, 61-start_epoch):
