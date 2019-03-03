@@ -11,6 +11,7 @@ from time import time
 
 """Cross-Modality ReID"""
 
+# 计算CMC和mAP评估匹配效果
 def eval_sysu(distmat, q_pids, g_pids, q_camids, g_camids, max_rank = 20):
     """Evaluation with sysu metric
     Key: for each query identity, its gallery images from the same camera view are discarded.

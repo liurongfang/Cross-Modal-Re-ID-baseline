@@ -1,3 +1,4 @@
+#coding:utf-8
 from __future__ import print_function
 import argparse
 import sys
@@ -27,12 +28,12 @@ parser.add_argument('--lr', default=0.01, type=float, help='learning rate')
 parser.add_argument('--optim', default='sgd', type=str, help='optimizer')
 parser.add_argument('--arch', default='resnet50', type=str, 
                     help='network baseline:resnet18 or resnet50')
-parser.add_argument('--resume', '-r', default='', type=str, 
+parser.add_argument('--resume', '-r', default='sysu_id_drop_0.0_lr_1.0e-02_dim_512_resnet50_best.t', type=str,
                     help='resume from checkpoint')
 parser.add_argument('--test-only', action='store_true', help='test only') 
-parser.add_argument('--model_path', default='D:/Projects/2019/2019-02-10_GradutePaper/3.Code/Cross-Modal-Re-ID-baseline/model/', type=str,
+parser.add_argument('--model_path', default='model/', type=str,
                     help='model save path')
-parser.add_argument('--save_epoch', default=20, type=int,
+parser.add_argument('--save_epoch', default=1, type=int,
                     metavar='s', help='save model every 10 epochs')
 parser.add_argument('--log_path', default='log/', type=str, 
                     help='log save path')
@@ -54,7 +55,7 @@ parser.add_argument('--drop', default=0.0, type=float,
                     metavar='drop', help='dropout ratio')
 parser.add_argument('--trial', default=1, type=int,
                     metavar='t', help='trial (only for RegDB dataset)')
-parser.add_argument('--gpu', default='1', type=str,
+parser.add_argument('--gpu', default='0', type=str,
                       help='gpu device ids for CUDA_VISIBLE_DEVICES')
 parser.add_argument('--mode', default='all', type=str, help='all or indoor')
 
@@ -64,7 +65,7 @@ np.random.seed(0)
 
 dataset = args.dataset
 if dataset == 'sysu':
-    data_path = 'C:/AccData/SYSU-MM01/'
+    data_path = '/home/liurf/dataset/SYSU-MM01/'
     log_path = args.log_path + 'sysu_log/'
     test_mode = [1, 2] # thermal to visible
 elif dataset =='regdb':
@@ -94,6 +95,7 @@ test_log_file = open(log_path + suffix + '.txt', "w")
 sys.stdout = Logger(log_path  + suffix + '_os.txt')
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
+print('using GPU') if device == 'cuda' else print('using CPU')
 best_acc = 0  # best test accuracy
 start_epoch = 0 
 feature_dim = args.low_dim
@@ -226,7 +228,7 @@ def train(epoch):
         input2 = Variable(input2.cuda())
         
         labels = torch.cat((label1,label2),0)
-        labels = Variable(labels.cuda())
+        labels = Variable(labels.long().cuda())
         data_time.update(time.time() - end)
         
         outputs, feat = net(input1, input2)
@@ -301,7 +303,7 @@ def test(epoch):
 
 # training
 print('==> Start Training...')    
-for epoch in range(start_epoch, 61-start_epoch):
+for epoch in range(start_epoch, 128-start_epoch):
 
     print('==> Preparing Data Loader...')
     # identity sampler

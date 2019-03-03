@@ -1,3 +1,4 @@
+#coding:utf-8
 from __future__ import print_function
 import argparse
 import sys
@@ -23,10 +24,12 @@ parser.add_argument('--dataset', default='sysu',  help='dataset name: regdb or s
 parser.add_argument('--lr', default=0.01, type=float, help='learning rate')
 parser.add_argument('--optim', default='sgd', type=str, help='optimizer')
 parser.add_argument('--arch', default='resnet50', type=str, help='network baseline')
-parser.add_argument('--resume', '-r', default='sysu_id_drop_0.0_lr_1.0e-02_dim_512_resnet50_best.t', type=str, help='resume from checkpoint')
-parser.add_argument('--model_path', default='D:/Projects/2019/2019-02-10_GradutePaper/3.Code/Cross-Modal-Re-ID-baseline/', type=str, help='model save path')
+#parser.add_argument('--resume', '-r', default='sysu_id_drop_0.0_lr_1.0e-02_dim_512_resnet50_best.t', type=str, help='resume from checkpoint')
+parser.add_argument('--resume', '-r', default='sysu_id_bn_relu_drop_0.0_lr_1.0e-02_dim_512_resnet50_epoch_58.t', type=str, help='resume from checkpoint')
+
+parser.add_argument('--model_path', default='model/', type=str, help='model save path')
 parser.add_argument('--log_path', default='log/', type=str, help='log save path')
-parser.add_argument('--workers', default=4, type=int, metavar='N',
+parser.add_argument('--workers', default=8, type=int, metavar='N',
                     help='number of data loading workers (default: 4)')
 parser.add_argument('--low-dim', default=512, type=int,
                     metavar='D', help='feature dimension')
@@ -44,7 +47,7 @@ parser.add_argument('--drop', default=0.0, type=float,
                     metavar='drop', help='dropout ratio')
 parser.add_argument('--trial', default=1, type=int,
                     metavar='t', help='trial')
-parser.add_argument('--gpu', default='1', type=str,
+parser.add_argument('--gpu', default='0', type=str,
                       help='gpu device ids for CUDA_VISIBLE_DEVICES')
 parser.add_argument('--mode', default='all', type=str, help='all or indoor')
 
@@ -54,7 +57,7 @@ os.environ['CUDA_VISIBLE_DEVICES'] = args.gpu
 np.random.seed(1)
 dataset = args.dataset
 if dataset == 'sysu':
-    data_path = 'E:/DataSets/SYSU-MM01/SYSU-MM01'
+    data_path = '/home/liurf/dataset/SYSU-MM01/'
     n_class = 395
     test_mode = [1, 2] 
 elif dataset =='regdb':
@@ -63,6 +66,7 @@ elif dataset =='regdb':
     test_mode = [2, 1]
  
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
+print('using GPU') if device == 'cuda' else print('using CPU')
 best_acc = 0  # best test accuracy
 start_epoch = 0 
 
@@ -85,9 +89,9 @@ if len(args.resume)>0:
     else:
         print('==> no checkpoint found at {}'.format(args.resume))
 
-
+# 使用ID损失
 if args.method =='id':
-    criterion = nn.CrossEntropyLoss()
+    criterion = nn.CrossEntropyLoss()   # 交叉熵损失
     criterion.to(device)
 
 print('==> Loading data..')
@@ -185,7 +189,8 @@ def extract_query_feat(query_loader):
             ptr = ptr + batch_num         
     print('Extracting Time:\t {:.3f}'.format(time.time()-start))
     return query_feat, query_feat_pool 
-    
+
+# 检测待查询集的特征
 query_feat, query_feat_pool = extract_query_feat(query_loader)    
 
 all_cmc = 0
@@ -215,7 +220,8 @@ elif dataset =='sysu':
         
         trial_gallset = TestData(gall_img, gall_label, transform = transform_test,img_size =(args.img_w,args.img_h))
         trial_gall_loader  = data.DataLoader(trial_gallset, batch_size=args.test_batch, shuffle=False, num_workers=4)
-        
+
+        # 检测相册图像的特征
         gall_feat, gall_feat_pool = extract_gall_feat(trial_gall_loader)
         
         # fc feature 
@@ -236,7 +242,7 @@ elif dataset =='sysu':
             all_cmc_pool = all_cmc_pool + cmc_pool
             all_mAP_pool = all_mAP_pool + mAP_pool
         
-        print ('Test Trial: {}'.format(trial))
+        print ('\nTest Trial: {}'.format(trial))
         print('FC: top-1: {:.2%} | top-5: {:.2%} | top-10: {:.2%}| top-20: {:.2%}'.format(
             cmc[0], cmc[4], cmc[9], cmc[19]))
         print('mAP: {:.2%}'.format(mAP))
